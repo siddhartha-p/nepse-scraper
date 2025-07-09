@@ -2,9 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import pandas as pd
+import os
 
 
-def scrape_table(data, date):
+def scrape_table(data, date, csv_filename="all_stock_data.csv"):
     # load data into bs4
     soup = BeautifulSoup(data, 'html.parser')
     # extract parts of  table from the page
@@ -17,7 +18,7 @@ def scrape_table(data, date):
         print("No record for ", date)
         return 0
     # save table as csv file
-    save_as_csv(headers, rows, date)
+    save_as_csv(headers, rows, date, csv_filename)
 
 
 def get_table_headers(table):
@@ -40,7 +41,25 @@ def get_table_rows(table):
         rows.append(cells)
     return rows
 
+def save_as_csv(headers, rows, date, csv_filename):
+    # Add date column to each row
+    updated_headers = ['Date'] + headers
+    updated_rows = []
+    for row in rows:
+        updated_rows.append([date] + row)
+    
+    # Create DataFrame
+    df = pd.DataFrame(updated_rows, columns=updated_headers)
+    
+    # Check if file exists to determine if we need to write headers
+    file_exists = os.path.exists(csv_filename)
+    
+    # Append to CSV file (create if doesn't exist)
+    df.to_csv(csv_filename, mode='a', header=not file_exists, index=False)
+    print(f"Data for {date} appended to {csv_filename}")
 
-def save_as_csv(headers, rows, date):
-    pd.DataFrame(rows, columns=headers).to_csv(f"{date}.csv", index=False)
-    print(date, "Saved")
+def initialize_csv(csv_filename="all_stock_data.csv"):
+    """Initialize/clear the CSV file for a new scraping session"""
+    if os.path.exists(csv_filename):
+        os.remove(csv_filename)
+        print(f"Existing {csv_filename} removed. Starting fresh.")

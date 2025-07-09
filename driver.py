@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import Select
 import time
 from datetime import date
 
-from scrape_table_all import scrape_table
+from scrape_table_all import scrape_table, initialize_csv
 from return_dates import return_dates
 
 # Update this path to your chromedriver location on Windows
@@ -49,8 +49,12 @@ except Exception as e:
 
 # Define date range
 sdate = date(2021, 6, 3)
-edate = date(2021, 7, 24)
+edate = date(2021, 6, 6)
 dates = return_dates(sdate, edate)
+
+# Initialize the CSV file (removes existing file if present)
+csv_filename = "all_stock_data.csv"
+initialize_csv(csv_filename)
 
 for day in dates:
     # Enter the date
@@ -69,7 +73,7 @@ for day in dates:
         
         # Scrape the table
         html = browser.page_source
-        scrape_table(data=html, date=day)
+        scrape_table(data=html, date=day, csv_filename=csv_filename)
         
     except Exception as e:
         print(f"Error processing date {day}: {e}")
