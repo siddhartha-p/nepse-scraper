@@ -42,6 +42,12 @@ def get_table_rows(table):
     return rows
 
 def save_as_csv(headers, rows, date, csv_filename):
+    # Remove S.No column from headers and rows
+    # Assuming S.No is the first column (index 0)
+    if headers and headers[0] == 'S.No':
+        headers = headers[1:]  # Remove S.No from headers
+        rows = [row[1:] for row in rows]  # Remove S.No from each row
+    
     # Add date column to each row
     updated_headers = ['Date'] + headers
     updated_rows = []
